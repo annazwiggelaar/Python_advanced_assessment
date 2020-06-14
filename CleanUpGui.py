@@ -16,10 +16,16 @@ class CleanUpGui(Frame):
         # Setup variables
         self.folder_details = None
         self.current_file = None
+        self.del_count = 0
+        self.del_bytes_count = 0
 
         # Setup GUI elements
         self.current_file_name = Label(self)
         self.current_file_size = Label(self)
+        self.current_file_preview = Label(self)
+        self.current_file_pic_preview = Label(self)
+        self.deleted_count = Label(self)
+        self.deleted_bytes_count = Label(self)
 
         self.delete_file_button = Button(self, text="delete", command=self.delete_current_file)
         self.skip_file_button = Button(self, text="skip", command=self.load_next_file)
@@ -28,26 +34,37 @@ class CleanUpGui(Frame):
         # Place GUI elements on Canvas
         self.current_file_name.pack()
         self.current_file_size.pack()
+        self.current_file_preview.pack()
+        self.current_file_pic_preview.pack()
+        self.deleted_count.pack()
+        self.deleted_bytes_count.pack()
 
         self.delete_file_button.pack()
         self.skip_file_button.pack()
         self.never_delete_button.pack()
 
-    # process buttons
+        # create menu
+        menu = Menu(self.master)
+        self.master.config(menu=menu)
+        file = Menu(menu)
+        file.add_command(label="Choose folder", command=self.change_folder)
+        menu.add_cascade(label="File", menu=file)
 
+    # process buttons
     def delete_current_file(self):
         # check if a current file is available
         if self.current_file:
             # delete the current file
             remove(join(self.folder_details.path, self.current_file.path))
-
+            self.del_count += 1
+            self.del_bytes_count += getsize(self.current_file) # doesn't work
         # load the next file
         self.load_next_file()
 
     def never_delete_file(self):
         if self.current_file:
             never_delete = open("messy_folder/never delete", "w")
-            never_delete.write(str(self.current_file))
+            never_delete.write(self.current_file.path)
         self.load_next_file()
 
     def load_next_file(self):
@@ -59,8 +76,12 @@ class CleanUpGui(Frame):
                 self.current_file = FileDetails(self, self.folder_details, "")
             self.current_file.display_details()
 
-    # startup
+    def change_folder(self):
+        cleanup = CleanUpGui(self)
+        folder_name = input("Which folder would you like to clean?")
+        cleanup.select_folder(folder_name)
 
+    # startup
     def select_folder(self, folder_path):
         self.folder_details = FolderDetails(folder_path)
         self.load_next_file()
