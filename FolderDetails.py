@@ -14,7 +14,7 @@ class FolderDetails():
         if self.files_to_check:
             # if the list is not empty return the next file from the list
             file = self.files_to_check.pop()
-            if str(file) not in "messy_folder/never delete":            # not working yet
+            if file not in "never_delete":            # not working yet
                 return file
         else:
             return None

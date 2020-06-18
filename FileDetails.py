@@ -24,7 +24,7 @@ class FileDetails():
                 file = open(join(self.folder.path, self.path))
                 first_line = file.readline()
                 self.gui.current_file_preview.configure(text="preview: " + str(first_line))
-            elif file_extension == ".jpg":
+            elif file_extension == ".jpg" or ".png":
                 pic = Image.open(join(self.folder.path, self.path))
                 self.picture = ImageTk.PhotoImage(pic)
                 self.gui.current_file_pic_preview.configure(image=self.picture)

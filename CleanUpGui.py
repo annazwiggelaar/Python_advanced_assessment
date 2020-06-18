@@ -55,16 +55,18 @@ class CleanUpGui(Frame):
         # check if a current file is available
         if self.current_file:
             # delete the current file
+            s = getsize(join(self.folder_details.path, self.current_file.path))
             remove(join(self.folder_details.path, self.current_file.path))
             self.del_count += 1
-            self.del_bytes_count += getsize(self.current_file) # doesn't work
+            self.del_bytes_count += s
         # load the next file
         self.load_next_file()
 
     def never_delete_file(self):
         if self.current_file:
-            never_delete = open("messy_folder/never delete", "w")
+            never_delete = open("never_delete", "a")
             never_delete.write(self.current_file.path)
+            never_delete.write("\n")
         self.load_next_file()
 
     def load_next_file(self):
@@ -76,7 +78,7 @@ class CleanUpGui(Frame):
                 self.current_file = FileDetails(self, self.folder_details, "")
             self.current_file.display_details()
 
-    def change_folder(self):
+    def change_folder(self):                            # not working
         cleanup = CleanUpGui(self)
         folder_name = input("Which folder would you like to clean?")
         cleanup.select_folder(folder_name)
