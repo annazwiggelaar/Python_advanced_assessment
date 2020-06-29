@@ -1,5 +1,6 @@
 from tkinter import *
-from os import remove, listdir
+from tkinter.ttk import *
+from os import remove, listdir, rename
 from os.path import exists, getsize, isdir, isfile, join
 
 from FileDetails import FileDetails
@@ -31,6 +32,10 @@ class CleanUpGui(Frame):
         self.skip_file_button = Button(self, text="skip", command=self.load_next_file)
         self.never_delete_button = Button(self, text="never delete this file", command=self.never_delete_file)
 
+        self.progress = Progressbar(self, orient=HORIZONTAL, length=200, mode="determinate")
+        self.progress.pack()
+        self.progress.config(maximum=200, value=10)         # use listdir length
+
         # Place GUI elements on Canvas
         self.current_file_name.pack()
         self.current_file_size.pack()
@@ -48,6 +53,7 @@ class CleanUpGui(Frame):
         self.master.config(menu=menu)
         file = Menu(menu)
         file.add_command(label="Choose folder", command=self.change_folder)
+        file.add_command(label="Rename file", command=self.popup_message)
         menu.add_cascade(label="File", menu=file)
 
     # process buttons
@@ -77,13 +83,37 @@ class CleanUpGui(Frame):
             else:
                 self.current_file = FileDetails(self, self.folder_details, "")
             self.current_file.display_details()
+            self.progress.step(10)          # increases length progress bar after going to the next file
 
     def change_folder(self):                            # not working
-        cleanup = CleanUpGui(self)
-        folder_name = input("Which folder would you like to clean?")
-        cleanup.select_folder(folder_name)
+        popup = Tk()
+        popup.wm_title("Choose folder")
+        label = Label(popup, text="Please enter the name of the folder you would like to clean up: ")
+        label.pack(side="top", fill="x", pady=10)
+        self.entry = Entry(popup)
+        self.entry.pack()
+        self.select_folder(self.entry.get())
 
     # startup
     def select_folder(self, folder_path):
         self.folder_details = FolderDetails(folder_path)
         self.load_next_file()
+
+    def popup_message(self):
+        popup = Tk()
+        popup.wm_title("Rename file")
+        label = Label(popup, text="Please enter how you would like to rename the file: ")
+        label.pack(side="top", fill="x", pady=10)
+        self.entry = Entry(popup)
+        self.entry.pack()
+        button = Button(popup, text="Rename", command=self.rename)
+        button.pack()
+        popup.mainloop()
+
+    def rename(self):
+        new_name = self.entry.get()
+        path = self.current_file.path       # 'str' object has no attribute 'splitext' error message
+        file_name, file_extension = path.splitext(path)
+        new_name_with_ext = new_name + file_extension
+        return rename(join(path, self.current_file), join(path, new_name_with_ext))
+
