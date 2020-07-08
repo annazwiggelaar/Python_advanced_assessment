@@ -24,12 +24,6 @@ class FolderDetails():
             next_file = self.files_to_check.pop()
             if next_file not in never_delete:
                 return next_file
-        else:       # else part of while, while list is not empty get a next file
-            pass
-
- #   def check_never_delete(self):
-  #      if str(self.files_to_check) not in "Python_advanced_assessment/never_delete":
-   #         return self.files_to_check.pop()
-    #    else:
-     #       pass
+        else:                           # else part of while, while list is not empty get a next file
+            pass                        # message that folder cleaning is completed is located in FileDetails
 

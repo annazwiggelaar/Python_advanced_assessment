@@ -29,6 +29,7 @@ class CleanUpGui(Frame):
         self.current_file_pic_preview = Label(self)
         self.deleted_count = Label(self)
         self.deleted_bytes_count = Label(self)
+        self.folder_empty = Label(self)
 
         self.delete_file_button = Button(self, text="delete", command=self.delete_current_file)
         self.skip_file_button = Button(self, text="skip", command=self.load_next_file)
@@ -37,12 +38,12 @@ class CleanUpGui(Frame):
         self.progress = Progressbar(self, orient=HORIZONTAL, length=200, mode="determinate")
         self.progress.pack()
 
-
         # Place GUI elements on Canvas
         self.current_file_name.pack()
         self.current_file_size.pack()
         self.current_file_preview.pack()
         self.current_file_pic_preview.pack()
+        self.folder_empty.pack()
         self.deleted_count.pack()
         self.deleted_bytes_count.pack()
 
@@ -56,6 +57,7 @@ class CleanUpGui(Frame):
         file = Menu(menu)
         file.add_command(label="Choose folder", command=self.change_folder)
         file.add_command(label="Rename file", command=self.popup_message)
+        file.add_command(label="Remove file from never_delete list", command=self.remove_never_delete)
         menu.add_cascade(label="File", menu=file)
 
     # process buttons
@@ -74,6 +76,32 @@ class CleanUpGui(Frame):
         self.folder_details.never_delete_file(self.current_file)
         self.load_next_file()
 
+    def remove_never_delete(self):
+        self.popup1 = Tk()
+        self.popup1.wm_title("Remove file from never_delete list")
+        label = Label(self.popup1, text="Please enter which file you would like to remove from the never_delete list: ")
+        label.pack(side="top", fill="x", pady=10)
+        self.entry1 = Entry(self.popup1)
+        self.entry1.pack()
+        button = Button(self.popup1, text="Remove", command=self.remove_file)
+        button.pack()
+        self.popup1.mainloop()
+
+    def remove_file(self):
+        remove_this_file = self.entry1.get()
+        file = open("messy_folder/never_delete", "r")
+        empty_list = []
+        for line in file:
+            if remove_this_file in line:
+                line = line.replace(remove_this_file, " ")
+            empty_list.append(line)
+        file.close()
+        file = open("messy_folder/never_delete", "w")
+        for line in empty_list:
+            file.write(line)
+        file.close()
+        self.popup1.destroy()
+
     def load_next_file(self):
         if self.folder_details:
             next_file = self.folder_details.get_next_file()
@@ -84,16 +112,9 @@ class CleanUpGui(Frame):
             self.current_file.display_details()
             self.progress.step(self.step_size)          # increases length progress bar after going to the next file
 
-    def change_folder(self):                            # not working
+    def change_folder(self):
         folder_name = filedialog.askdirectory()
         self.select_folder(folder_name)
-       # popup = Tk()
-       # popup.wm_title("Choose folder")
-       # label = Label(popup, text="Please enter the name of the folder you would like to clean up: ")
-       # label.pack(side="top", fill="x", pady=10)
-       # self.entry = Entry(popup)
-       # self.entry.pack()
-       # self.select_folder(self.entry.get())
 
     # startup
     def select_folder(self, folder_path):
@@ -115,7 +136,7 @@ class CleanUpGui(Frame):
 
     def file_rename(self):
         new_name = self.entry.get()
-        path = self.folder_details.path       # 'str' object has no attribute 'splitext' error message
+        path = self.folder_details.path
         file_name, file_extension = splitext(path)
         new_name_with_ext = new_name + file_extension
         rename(join(self.folder_details.path, self.current_file.path), join(self.folder_details.path,

@@ -2,6 +2,8 @@ import os
 from os.path import exists, join, getsize
 from tkinter import *
 from PIL import ImageTk, Image
+import time
+import winsound
 
 
 class FileDetails():
@@ -28,9 +30,17 @@ class FileDetails():
                 pic = Image.open(join(self.folder.path, self.path))
                 self.picture = ImageTk.PhotoImage(pic)
                 self.gui.current_file_pic_preview.configure(image=self.picture)
+            elif file_extension == ".wav":
+                file = join(self.folder.path, self.path)
+                winsound.PlaySound(file, winsound.SND_ASYNC)
+                time.sleep(5)
+                winsound.PlaySound(None, winsound.SND_ASYNC)
+                self.gui.current_file_preview.configure(text="preview: you just heard the first 5 seconds of "
+                                                             + str(self.path))
+            else:       # if file is not one of above file types
+                self.gui.current_file_preview.configure(text="preview: not available for this file type")
         else:
+            self.gui.folder_empty.configure(text="Congratulations, you have cleaned this folder!")
             self.gui.current_file_name.configure(text="file name: <no file selected>")
             self.gui.current_file_size.configure(text="file size: <no file selected>")
-
-
-
+            self.gui.current_file_preview.configure(text="preview: <no file selected>")
